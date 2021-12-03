@@ -4,6 +4,7 @@
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "font.h"
 #include "primitives.h"
@@ -31,15 +32,24 @@ void Copy_ToCanvas(uint32_t* ptr, int w, int h) {
     }, ptr, w, h);
 }
 
-//int vv = 0;
+uint32_t my_GetTickCount() {
+  return emscripten_get_now();
+};
+
+uint32_t tik = 0;
 
 static void main_loop()
 {
+   if(tik+15 > my_GetTickCount()) return;
+   tik = my_GetTickCount();
+   
+
    uint32_t *q, col;;
    q = screen;
    col = scene.SCENE_COLOR;
    for(int i=0;i<800*800;i++) *q++ = col;
   
+   
    if( scene.user.is_immunity > 0 ) scene.user.is_immunity--;
 
    bool flag_x = false, flag_y = false;
@@ -56,7 +66,7 @@ static void main_loop()
      if(scene.user.speed_y > 0) scene.user.speed_y -= 0.45;
      if(scene.user.speed_y < 0) scene.user.speed_y += 0.45;
    }
-
+   
    scene.paint(screen, 800, &font);
 
    scene.zombie.calc_move(screen, 800, &scene);
